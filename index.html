@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Release Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: пульт релиз-менеджера — сводка сверху, конвейер стадий, список релизов слева и карточка релиза справа */
+:root{
+  --bg:#eef1f5; --panel:#ffffff; --ink:#152033; --muted:#5d6b80; --line:#d6dce6;
+  --accent:#2944c9; --accent-soft:#e3e8fb;
+  --ok:#1f7a4d; --ok-soft:#dff3e8; --warn:#9a6200; --warn-soft:#fbefd6; --bad:#b3261e; --bad-soft:#fbe3e1;
+  --f-display:"Unbounded", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Onest", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141c; --panel:#171e2a; --ink:#e6ebf3; --muted:#93a0b4; --line:#2a3445;
+  --accent:#8ea2ff; --accent-soft:#232d4d;
+  --ok:#6fd3a0; --ok-soft:#173226; --warn:#f0bf5e; --warn-soft:#352a12; --bad:#ff8c84; --bad-soft:#3a1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141c; --panel:#171e2a; --ink:#e6ebf3; --muted:#93a0b4; --line:#2a3445;
+  --accent:#8ea2ff; --accent-soft:#232d4d;
+  --ok:#6fd3a0; --ok-soft:#173226; --warn:#f0bf5e; --warn-soft:#352a12; --bad:#ff8c84; --bad-soft:#3a1c1a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 48px;display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font:700 clamp(22px,4vw,30px)/1.1 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.mode{font:12px var(--f-mono);color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:4px 8px}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{background:var(--accent);color:var(--panel);border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.rel:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font:600 24px var(--f-mono);font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.pipe{display:flex;flex-wrap:wrap;gap:6px}
+.pipe button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px}
+.pipe button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pipe small{font-family:var(--f-mono);opacity:.7;margin-left:4px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start}
+@media (max-width:820px){.main{grid-template-columns:minmax(0,1fr)}}
+.list{display:grid;gap:8px}
+.rel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;text-align:left;width:100%}
+.rel[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.rel .v{font:600 14px var(--f-mono)}
+.rel .n{grid-column:1/-1;min-width:0;overflow-wrap:anywhere}
+.rel .meta{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.bar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;grid-column:1/-1}
+.bar i{display:block;height:100%;background:var(--accent)}
+.chip{font:600 11px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:999px;white-space:nowrap;align-self:start}
+.s-planned{background:var(--accent-soft);color:var(--accent)}
+.s-dev{background:var(--warn-soft);color:var(--warn)}
+.s-qa{background:var(--warn-soft);color:var(--warn)}
+.s-prod{background:var(--ok-soft);color:var(--ok)}
+.s-rollback{background:var(--bad-soft);color:var(--bad)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:16px;min-width:0}
+.card h2{font:700 18px var(--f-display);margin:0;overflow-wrap:anywhere}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.steps{display:flex;gap:4px;flex-wrap:wrap}
+.steps button{flex:1 1 80px;border:1px solid var(--line);background:transparent;border-radius:6px;padding:6px;font-size:12px;cursor:pointer}
+.steps button.on{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.steps button.rb.on{background:var(--bad);border-color:var(--bad)}
+.check{display:grid;gap:6px}
+.check label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--accent)}
+.check .done{color:var(--muted);text-decoration:line-through}
+textarea,input[type=text],input[type=date],select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:80px;resize:vertical}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.empty{color:var(--muted);text-align:center;padding:32px 12px;border:1px dashed var(--line);border-radius:10px}
+.confirm{background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Release Board</h1>
+      <p class="sub">Календарь выкладок, стадии и чек-лист готовности к релизу</p>
+    </div>
+    <div class="row">
+      <span class="mode" id="mode">подключение…</span>
+      <button class="btn" id="newBtn">+ Новый релиз</button>
+    </div>
+  </header>
+
+  <section class="stats" id="stats" aria-label="Сводка"></section>
+  <nav class="pipe" id="pipe" aria-label="Фильтр по стадии"></nav>
+
+  <div class="main">
+    <div class="list" id="list"></div>
+    <div id="detail"></div>
+  </div>
+</div>
+
+<script>
+const STAGES=[
+  {id:"planned",t:"План"},{id:"dev",t:"Разработка"},{id:"qa",t:"Тестирование"},
+  {id:"prod",t:"В проде"},{id:"rollback",t:"Откат"}];
+const STAGE=Object.fromEntries(STAGES.map(s=>[s.id,s.t]));
+const CHECK=["Все задачи релиза закрыты в Jira","Регресс пройден QA","Миграции БД проверены на стейдже","Release notes согласованы","План отката описан","Команда поддержки предупреждена"];
+const DEMO=[
+ {id:"d1",version:"2.4.0",name:"Смены: обмен сменами между сотрудниками",date:"2026-10-08",stage:"qa",owner:"Борис Ф.",notes:"Ждём фикс по уведомлениям.",checklist:CHECK.map((t,i)=>({t,done:i<3})),example:true},
+ {id:"d2",version:"2.3.2",name:"Hotfix: расчёт ночных часов",date:"2026-09-24",stage:"prod",owner:"Борис Ф.",notes:"Выкачено без простоя.",checklist:CHECK.map(t=>({t,done:true})),example:true},
+ {id:"d3",version:"2.3.1",name:"Экспорт табеля в Excel",date:"2026-09-17",stage:"rollback",owner:"Борис Ф.",notes:"Откат: неверная кодировка файла. Перенос в 2.3.2.",checklist:CHECK.map((t,i)=>({t,done:i!==1})),example:true},
+ {id:"d4",version:"2.5.0",name:"Отчёт по выручке точки",date:"2026-10-22",stage:"dev",owner:"Борис Ф.",notes:"",checklist:CHECK.map(t=>({t,done:false})),example:true},
+];
+let db=null, canWrite=false, releases=[], filter="all", selected=null, editing=null, confirmDel=false;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=d=>d?new Date(d+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"}):"—";
+const prog=r=>{const c=r.checklist||[];return c.length?Math.round(c.filter(x=>x.done).length/c.length*100):0};
+const today=new Date().toISOString().slice(0,10);
+
+function render(){if(!db&&releases.length){try{localStorage.setItem("rb_releases",JSON.stringify(releases))}catch{}}
+  const upcoming=releases.filter(r=>r.date>=today&&r.stage!=="prod"&&r.stage!=="rollback").sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const month=today.slice(0,7);
+  const prodM=releases.filter(r=>r.stage==="prod"&&(r.date||"").startsWith(month)).length;
+  const done=releases.filter(r=>r.stage==="prod"||r.stage==="rollback");
+  const rbRate=done.length?Math.round(releases.filter(r=>r.stage==="rollback").length/done.length*100):0;
+  $("stats").innerHTML=`
+    <div class="stat"><span>Следующий релиз</span><b>${upcoming?esc(upcoming.version):"—"}</b><div class="muted">${upcoming?fmt(upcoming.date):"нет в плане"}</div></div>
+    <div class="stat"><span>В работе</span><b>${releases.filter(r=>["dev","qa"].includes(r.stage)).length}</b><div class="muted">разработка + тест</div></div>
+    <div class="stat"><span>Выкачено за месяц</span><b>${prodM}</b><div class="muted">стадия «В проде»</div></div>
+    <div class="stat"><span>Доля откатов</span><b>${rbRate}%</b><div class="muted">от завершённых релизов</div></div>`;
+  const cnt=s=>releases.filter(r=>r.stage===s).length;
+  $("pipe").innerHTML=[`<button data-f="all" aria-pressed="${filter==="all"}">Все<small>${releases.length}</small></button>`]
+    .concat(STAGES.map(s=>`<button data-f="${s.id}" aria-pressed="${filter===s.id}">${s.t}<small>${cnt(s.id)}</small></button>`)).join("");
+  const shown=releases.filter(r=>filter==="all"||r.stage===filter).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  $("list").innerHTML=shown.length?shown.map(r=>`
+    <button class="rel" data-id="${r.id}" aria-current="${selected===r.id}">
+      <span class="v">v${esc(r.version)}</span><span class="chip s-${r.stage}">${STAGE[r.stage]}</span>
+      <span class="n">${esc(r.name)}</span>
+      <span class="bar"><i style="width:${prog(r)}%"></i></span>
+      <span class="meta"><span>📅 ${fmt(r.date)}</span><span>Чек-лист ${prog(r)}%</span>${r.owner?`<span>${esc(r.owner)}</span>`:""}${r.example?"<span>пример</span>":""}</span>
+    </button>`).join(""):`<div class="empty">${releases.length?"В этой стадии релизов нет.":"Релизов пока нет. Нажмите «+ Новый релиз», чтобы добавить первый."}</div>`;
+  renderDetail();
+}
+
+function renderDetail(){
+  const el=$("detail");
+  if(editing){
+    const r=editing;
+    el.innerHTML=`<form class="card" id="relForm">
+      <h2>${r.id?"Редактировать релиз":"Новый релиз"}</h2>
+      <div class="form">
+        <div><div class="label">Версия</div><input type="text" id="fVer" required placeholder="2.6.0" value="${esc(r.version)}"></div>
+        <div><div class="label">Дата выкладки</div><input type="date" id="fDate" required value="${esc(r.date)}"></div>
+        <div><div class="label">Ответственный</div><input type="text" id="fOwner" value="${esc(r.owner)}"></div>
+        <div><div class="label">Стадия</div><select id="fStage">${STAGES.map(s=>`<option value="${s.id}" ${r.stage===s.id?"selected":""}>${s.t}</option>`).join("")}</select></div>
+      </div>
+      <div><div class="label">Название / скоуп</div><input type="text" id="fName" required value="${esc(r.name)}"></div>
+      <div><div class="label">Заметки</div><textarea id="fNotes">${esc(r.notes)}</textarea></div>
+      <div class="row"><button class="btn" type="submit">Сохранить</button><button class="btn ghost" type="button" id="cancelEdit">Отмена</button></div>
+    </form>`;
+    return;
+  }
+  const r=releases.find(x=>x.id===selected);
+  if(!r){el.innerHTML=`<div class="card"><p class="muted">Выберите релиз слева, чтобы увидеть стадию, чек-лист готовности и заметки.</p></div>`;return}
+  el.innerHTML=`<article class="card">
+    <div class="row" style="justify-content:space-between"><span class="v" style="font:600 14px var(--f-mono)">v${esc(r.version)} · ${fmt(r.date)}</span><span class="chip s-${r.stage}">${STAGE[r.stage]}</span></div>
+    <h2>${esc(r.name)}</h2>
+    <div><div class="label">Стадия</div><div class="steps">${STAGES.map(s=>`<button data-stage="${s.id}" class="${s.id==="rollback"?"rb ":""}${r.stage===s.id?"on":""}" ${canWrite?"":"disabled"}>${s.t}</button>`).join("")}</div></div>
+    <div><div class="label">Чек-лист готовности · ${prog(r)}%</div><div class="check">${(r.checklist||[]).map((c,i)=>`<label><input type="checkbox" data-ci="${i}" ${c.done?"checked":""} ${canWrite?"":"disabled"}><span class="${c.done?"done":""}">${esc(c.t)}</span></label>`).join("")}</div></div>
+    <div><div class="label">Заметки</div><p style="margin:0;white-space:pre-wrap">${esc(r.notes)||'<span class="muted">Нет заметок</span>'}</p></div>
+    ${canWrite?(confirmDel?`<div class="confirm">Удалить релиз v${esc(r.version)}? <button class="btn danger" id="delYes">Удалить</button><button class="btn ghost" id="delNo">Отмена</button></div>`:`<div class="row"><button class="btn ghost" id="editBtn">Редактировать</button><button class="btn danger" id="delBtn">Удалить</button></div>`):`<p class="muted">Режим просмотра.</p>`}
+  </article>`;
+}
+
+async function save(r){
+  const {id,...body}=r;
+  if(!db){const i=releases.findIndex(x=>x.id===id);i>=0?releases[i]=r:releases.push(r);render();return}
+  try{await db.collection("releases").doc(id).set(body)}catch(e){alert_(e)}
+}
+function alert_(e){$("mode").textContent="ошибка сохранения: "+(e.code||e.message)}
+
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.f){filter=t.dataset.f;render();return}
+  if(t.dataset.id){selected=t.dataset.id;editing=null;confirmDel=false;render();return}
+  const r=releases.find(x=>x.id===selected);
+  if(t.id==="newBtn"){editing={id:"",version:"",name:"",date:today,stage:"planned",owner:"",notes:""};render();return}
+  if(t.id==="cancelEdit"){editing=null;render();return}
+  if(t.id==="editBtn"&&r){editing={...r};render();return}
+  if(t.id==="delBtn"){confirmDel=true;renderDetail();return}
+  if(t.id==="delNo"){confirmDel=false;renderDetail();return}
+  if(t.id==="delYes"&&r){confirmDel=false;selected=null;
+    if(db){try{await db.collection("releases").doc(r.id).delete()}catch(err){alert_(err)}}else{releases=releases.filter(x=>x.id!==r.id);render()}return}
+  if(t.dataset.stage&&r){await save({...r,stage:t.dataset.stage});return}
+});
+document.addEventListener("change",async e=>{
+  const i=e.target.dataset.ci;if(i===undefined)return;
+  const r=releases.find(x=>x.id===selected);if(!r)return;
+  const checklist=r.checklist.map((c,k)=>k==i?{...c,done:e.target.checked}:c);
+  await save({...r,checklist});
+});
+document.addEventListener("submit",async e=>{
+  if(e.target.id!=="relForm")return;e.preventDefault();
+  const base=editing;
+  const r={...base,id:base.id||("r"+Date.now().toString(36)),version:$("fVer").value.trim(),date:$("fDate").value,owner:$("fOwner").value.trim(),stage:$("fStage").value,name:$("fName").value.trim(),notes:$("fNotes").value,checklist:base.checklist||CHECK.map(t=>({t,done:false}))};
+  delete r.example;
+  editing=null;selected=r.id;await save(r);render();
+});
+
+function demoMode(msg){let st=null;try{st=JSON.parse(localStorage.getItem("rb_releases"))}catch{}releases=st||DEMO.map(r=>({...r}));canWrite=true;$("mode").textContent=msg;selected=releases[0].id;render()}
+
+render();
+(async()=>{
+  try{db=await window.claude?.use?.("db")}catch{db=null}
+  if(!db){db=null;demoMode("данные хранятся в этом браузере");return}
+  let user=null;try{user=await claude.use("user")}catch{}
+  const w=user?await user.can("data.write"):null;
+  canWrite=w!==false;
+  $("mode").textContent=canWrite?"общая база · синхронизация":"только просмотр";
+  if(!canWrite)$("newBtn").hidden=true;
+  db.collection("releases").onSnapshot(s=>{
+    releases=s.docs.map(d=>({id:d.id,...d.data()}));
+    if(!selected&&releases.length)selected=[...releases].sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0].id;
+    render();
+  },err=>{$("mode").textContent="нет связи с базой"});
+})();
+</script>
+
+</html>
