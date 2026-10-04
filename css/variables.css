@@ -1,0 +1,61 @@
+/* Дизайн-токены: цвета, шрифты. Светлая тема по умолчанию, тёмная — по системной настройке */
+
+:root {
+  --bg: #eef1f5;
+  --panel: #ffffff;
+  --ink: #152033;
+  --muted: #5d6b80;
+  --line: #d6dce6;
+  --accent: #2944c9;
+  --accent-soft: #e3e8fb;
+  --ok: #1f7a4d;
+  --ok-soft: #dff3e8;
+  --warn: #9a6200;
+  --warn-soft: #fbefd6;
+  --bad: #b3261e;
+  --bad-soft: #fbe3e1;
+
+  --f-display: "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Onest", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c;
+    --panel: #171e2a;
+    --ink: #e6ebf3;
+    --muted: #93a0b4;
+    --line: #2a3445;
+    --accent: #8ea2ff;
+    --accent-soft: #232d4d;
+    --ok: #6fd3a0;
+    --ok-soft: #173226;
+    --warn: #f0bf5e;
+    --warn-soft: #352a12;
+    --bad: #ff8c84;
+    --bad-soft: #3a1c1a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f141c;
+  --panel: #171e2a;
+  --ink: #e6ebf3;
+  --muted: #93a0b4;
+  --line: #2a3445;
+  --accent: #8ea2ff;
+  --accent-soft: #232d4d;
+  --ok: #6fd3a0;
+  --ok-soft: #173226;
+  --warn: #f0bf5e;
+  --warn-soft: #352a12;
+  --bad: #ff8c84;
+  --bad-soft: #3a1c1a;
+  color-scheme: dark;
+}
