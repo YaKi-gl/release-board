@@ -1,41 +1,19 @@
 <!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Release Board</title>
-  <meta name="description" content="Трекер релизов: стадии, чек-лист готовности и метрики релизного процесса.">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
-
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-
-  <script type="module" src="js/main.js"></script>
-</head>
-<body>
-  <div class="app">
-    <header class="app-header">
-      <div>
-        <h1>Release Board</h1>
-        <p class="app-header__subtitle">Календарь выкладок, стадии и чек-лист готовности к релизу</p>
-      </div>
-      <div class="row">
-        <span class="storage-badge" id="storage-badge"></span>
-        <button class="btn" data-action="create">+ Новый релиз</button>
-      </div>
-    </header>
-
-    <section class="stats" id="stats" aria-label="Сводка"></section>
-    <nav class="pipeline" id="pipeline" aria-label="Фильтр по стадии"></nav>
-
-    <main class="workspace">
-      <div class="release-list" id="release-list"></div>
-      <div id="release-detail"></div>
-    </main>
-  </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Трекер релизов: стадии, чек-лист готовности и метрики релизного процесса." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <title>Release Board</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

@@ -1,0 +1,14 @@
+.release-form {
+  display: grid;
+  gap: 10px;
+}
+
+.release-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.form-field {
+  display: grid;
+}
